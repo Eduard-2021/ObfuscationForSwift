@@ -6,7 +6,7 @@
 //
 
 // main.swift
-
+/*
 import Foundation
 
 // MARK: - VariableInfo
@@ -204,3 +204,4 @@ let rootURL = URL(fileURLWithPath: rootPath)
 ObfuscationRunner().runObfuscation(on: rootURL)
 */
 
+*/

@@ -33,7 +33,7 @@ class CamelCaseDetector {
                 guard let nameRange = Range(varMatch.range(at: 2), in: content) else { continue }
                 let name = String(content[nameRange])
 
-                if name.first?.isLowercase == true && name.contains(where: { $0.isUppercase }) {
+                if name.first?.isLowercase == true && name != "body" /*&& name.contains(where: { $0.isUppercase })*/ {
                     result.append(VariableInfo(filePath: fileURL.path, typeName: typeName, variableName: name))
                 }
             }

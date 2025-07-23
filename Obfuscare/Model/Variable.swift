@@ -9,14 +9,6 @@ import Foundation
 
 // MARK: - CamelCaseDetector
 
-/*
-struct Variable {
-    let name: String
-    let filePath: String
-    let range: NSRange
-}
-*/
-
 struct VariableInfo {
     let filePath: String
     let typeName: String

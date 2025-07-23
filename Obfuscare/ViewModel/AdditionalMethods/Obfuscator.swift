@@ -28,13 +28,15 @@ class Obfuscator {
             for variable in vars {
                 let firstWord = extractFirstWord(from: variable.variableName)
                 var suffix: String
+                
+                let shortPrefix = abbreviatedFirstWord(from: firstWord)
 
                 repeat {
                     suffix = englishWords.randomElement() ?? UUID().uuidString
                 } while usedSuffixes.contains(suffix)
 
                 usedSuffixes.insert(suffix)
-                nameMap[variable.variableName] = firstWord + suffix
+                nameMap[variable.variableName] = shortPrefix + suffix
             }
 
             obfuscationMap[type] = nameMap
@@ -47,6 +49,17 @@ class Obfuscator {
             return String(camelCase[range])
         }
         return camelCase
+    }
+    
+    
+    func abbreviatedFirstWord(from firstWord: String) -> String {
+            if firstWord.count >= 2 {
+                let firstChar = firstWord.first!
+                let lastChar = firstWord.last!
+                return "\(firstChar)\(lastChar)"
+            } else {
+                return firstWord // якщо перше слово коротше ніж 2 літери
+            }
     }
 
     /*
@@ -82,7 +95,7 @@ class Obfuscator {
                 // Базові патерни: self.property і просто property
                 let basePatterns: [(pattern: String, template: String)] = [
                     ("\\bself\\.\(original)\\b", "self.\(obfuscated)"),
-                    ("(?<!\\w)\(original)\\b", obfuscated)
+                    ("(?<!\\w)\(original)\\b(?!\\s*\\()", obfuscated)
                 ]
 
                 // Вкладені виклики через екземпляри об'єктів
@@ -91,7 +104,7 @@ class Obfuscator {
                     .flatMap { instance, _ in
                         return [
                             ("\\bself\\.\(instance)\\.\(original)\\b", "self.\(instance).\(obfuscated)"),
-                            ("(?<!\\w)\(instance)\\.\(original)\\b", "\(instance).\(obfuscated)")
+                            ("(?<!\\w)\(instance)\\.\(original)\\b(?!\\s*\\()", "\(instance).\(obfuscated)")
                         ]
                     }
 
