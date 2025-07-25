@@ -10,23 +10,6 @@ import Foundation
 class InstanceDetector {
     func detectInstances(in fileURL: URL) -> [InstanceInfo] {
         guard let content = try? String(contentsOf: fileURL) else { return [] }
-//        let pattern = "\\b(var|let)\\s+(\\w+)\\s*:?\\s*(\\w+)\\??\\s*(=\\s*\\w+\\([^)]*\\))?"
-//        let pattern = #"\b(var|let)\s+(?!body\b)(?!some\b)(?!Scene\b)(?!App\b)(\w+)\s*:?\\s*(\w+)\??\s*(=\s*\w+\([^)]*\))?"#
-//        let pattern = #"(?:@?\w+\s+)*\b(var|let)\s+(?!body\b)(?!some\b)(?!Scene\b)(?!App\b)(\w+)\s*:?[\s]*([\w<>]+)?\??\s*(=\s*\w+\([^)]*\))?"#
-//        let pattern = #"""
-//        (?:@?\w+\s+|private\s+|public\s+|static\s+|lazy\s+|weak\s+|final\s+)*\b(var|let)\s+(?!body\b)(?!some\b)(?!Scene\b)(?!App\b)(\w+)\s*:?[\s]*([\w<>\.]+)?\??\s*(=\s*\w+\s*\([^)]*\))?
-//        """#
-//        let pattern = #"""
-//        (?:@?\w+\s+|private\s+|public\s+|static\s+|lazy\s+|weak\s+|final\s+)*\b(var|let)\s+(?!body\b)(?!some\b)(?!Scene\b)(?!App\b)(\w+)\s*:?[\s]*([\w<>\.]+)?\??\s*(=\s*[\w\.]+\s*\([^)]*\))?
-//        """#
-//        let pattern = #"""
-//        (?:(?:@?\w+\s+)*)(?:private\s+|public\s+|internal\s+|static\s+|lazy\s+|weak\s+|final\s+)*\b(var|let)\s+(?!body\b)(?!some\b)(?!Scene\b)(?!App\b)(\w+)\s*(?::\s*([\w<>\.]+)\??)?(?:\s*=\s*.+)?
-//        """#
-        /*
-        let pattern = #"""
-        (?<!\bguard\s)(?<!\bcase\s)(?:(?:@?\w+\s+)*)(?:private\s+|public\s+|internal\s+|static\s+|lazy\s+|weak\s+|final\s+)*\b(var|let)\s+(?!body\b)(?!some\b)(?!Scene\b)(?!App\b)(\w+)\s*(?::\s*([\w<>\.]+)\??)?(?:\s*=\s*([\w\.]+)\s*\([^)]*\))?
-        """#
-        */
         let pattern = #"""
         (?<!\bguard\s)(?<!\bcase\s)(?:(?:@?\w+\s+)*)(?:private\s+|public\s+|internal\s+|static\s+|lazy\s+|weak\s+|final\s+)*\b(var|let)\s+(?!body\b)(?!some\b)(?!Scene\b)(?!App\b)(\w+)\s*(?::\s*([\w<>\.]+)\??)?(?:\s*=\s*([A-Z][\w\.]*)\s*\([^)]*\))?
         """#
@@ -57,14 +40,7 @@ class InstanceDetector {
             } else {
                 return
             }
-            /*
-            let instance = String(content[instanceRange])
-            let type = String(content[typeRange])
-
-            results.append(InstanceInfo(filePath: fileURL.path, instanceName: instance, typeName: type))
-             */
         }
-
         return results
     }
 }

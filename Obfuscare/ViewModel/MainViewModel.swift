@@ -23,22 +23,35 @@ class MainViewModel: ObservableObject {
     
 
     func runObfuscation() {
-        let rootPath = "/Users/macintoshhd/Documents/Xcode/Work/Test/TestObfuscare1"
+//        let rootPath = "/Users/macintoshhd/Documents/Xcode/Work/Test/TestObfuscare1"
+        let rootPath = "/Users/macintoshhd/Documents/Xcode/Work/Test/XSpy_OpenMainCodeForTest(new)"
+//        let rootPath = "/Users/macintoshhd/Documents/Xcode/Work/Test/TestObfuscare3"
+        
         let rootURL = URL(fileURLWithPath: rootPath)
         let swiftFiles = projectScanner.scan(forSwiftFilesIn: rootURL)
 
-        let allVariables = swiftFiles.flatMap { detector.detectVariables(in: $0) }
+//        let allVariables = swiftFiles.flatMap { detector.detectVariables(in: $0) }
+        let allVariables = swiftFiles.flatMap { detector.detectVariablesAndMethods(in: $0) }
         obfuscator.generateObfuscationMap(from: allVariables)
+        
+        let userDefinedTypes = Set(allVariables.map { $0.typeName })
 
         var instancesPerFile: [String: [String: String]] = [:]
         for file in swiftFiles {
-            let instances = instanceDetector.detectInstances(in: file)
-            instancesPerFile[file.path] = Dictionary(uniqueKeysWithValues: instances.map { ($0.instanceName, $0.typeName) })
-        }
+            var instances = instanceDetector.detectInstances(in: file)
+            instances.append(InstanceInfo(filePath: file.path, instanceName: "Constants", typeName: "Constants"))
+            instancesPerFile[file.path] = Dictionary(instances.map { ($0.instanceName, $0.typeName) }, uniquingKeysWith: { _, new in new })
 
+//            instancesPerFile[file.path] = Dictionary(uniqueKeysWithValues: instances.map { ($0.instanceName, $0.typeName) })
+        }
+        var count = 0
+        var pathString  = ""
+        
         for file in swiftFiles {
+            count += 1
+            pathString = file.path
             let instanceMap = instancesPerFile[file.path] ?? [:]
-            obfuscator.obfuscateVariables(in: file, instanceToType: instanceMap)
+            obfuscator.obfuscateCode(in: file, instanceToType: instanceMap, userDefinedTypes: userDefinedTypes)
         }
         isShowAlert = true
     }

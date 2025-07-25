@@ -13,4 +13,14 @@ struct VariableInfo {
     let filePath: String
     let typeName: String
     let variableName: String
+    let isMethod: Bool
 }
+
+
+/*
+struct VariableInfo {
+    let filePath: String
+    let typeName: String
+    let variableName: String
+}
+*/
