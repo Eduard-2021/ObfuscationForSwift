@@ -228,13 +228,127 @@ class Obfuscator {
         
         
         var ignoredParams = Set<String>()
+        // MARK: - Частина 1: Ланцюжки викликів типу A.B.C.method(...) або з нового рядка .method(...)
+        let chainPattern = #"(?<!\w)([A-Z]\w*(?:<[^>]+>)?)?(?:\s*\n)?((?:\.\w+)+)\s*\((.*?)\)"#
 
-        // MARK: - Частина 1: Витягаємо всі імена з ланцюжків типу A.B.C.method(...)
-        let chainPattern = #"""
-        (?<!\w)([A-Z]\w*(?:<[^>]+>)?)((?:\.\w+)+)\s*\(([^)]*)\)
-        """#
+        if let regex = try? NSRegularExpression(pattern: chainPattern, options: [.dotMatchesLineSeparators]) {
+            let matches = regex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
+            
+            for match in matches {
+                guard
+                    let typeRange = Range(match.range(at: 1), in: content),
+                    let chainRange = Range(match.range(at: 2), in: content)
+                else { continue }
 
-        if let regex = try? NSRegularExpression(pattern: chainPattern) {
+                let typeName = String(content[typeRange])
+                let chain = String(content[chainRange]) // .a.b.c
+
+                // 🔧 Виправлення: працюємо і з пустим typeName (SwiftUI стиль)
+                if typeName.isEmpty || !userDefinedTypes.contains(typeName) {
+                    let parts = chain
+                        .split(separator: ".")
+                        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                        .filter { !$0.isEmpty }
+
+                    ignoredParams.formUnion(parts)
+
+                    // 🔽 Параметри всередині дужок (...), незалежно від рядків
+                    if let paramsRange = Range(match.range(at: 3), in: content) {
+                        let paramsString = String(content[paramsRange])
+                        let paramPattern = #"\b(\w+)\s*:"#
+                        if let paramRegex = try? NSRegularExpression(pattern: paramPattern) {
+                            let paramMatches = paramRegex.matches(
+                                in: paramsString,
+                                range: NSRange(paramsString.startIndex..<paramsString.endIndex, in: paramsString)
+                            )
+                            for paramMatch in paramMatches {
+                                if let nameRange = Range(paramMatch.range(at: 1), in: paramsString) {
+                                    ignoredParams.insert(String(paramsString[nameRange]))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        
+        
+        // MARK: - Частина 1-б: SwiftUI-style методи з нового рядка: .methodName(param1:, param2:)
+        let swiftUIMethodPattern = #"(?m)^\s*\.(\w+)\s*\(([^)]*)\)"#
+
+        if let regex = try? NSRegularExpression(pattern: swiftUIMethodPattern, options: [.dotMatchesLineSeparators]) {
+            let matches = regex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
+
+            for match in matches {
+                guard
+                    let methodRange = Range(match.range(at: 1), in: content),
+                    let paramsRange = Range(match.range(at: 2), in: content)
+                else { continue }
+
+                let methodName = String(content[methodRange])
+                ignoredParams.insert(methodName)
+
+                let paramsString = String(content[paramsRange])
+                let paramPattern = #"\b(\w+)\s*:"#
+                if let paramRegex = try? NSRegularExpression(pattern: paramPattern) {
+                    let paramMatches = paramRegex.matches(
+                        in: paramsString,
+                        range: NSRange(paramsString.startIndex..<paramsString.endIndex, in: paramsString)
+                    )
+                    for paramMatch in paramMatches {
+                        if let nameRange = Range(paramMatch.range(at: 1), in: paramsString) {
+                            ignoredParams.insert(String(paramsString[nameRange]))
+                        }
+                    }
+                }
+            }
+        }
+
+        // MARK: - Частина 1-в: error у блоках catch
+        let catchErrorPattern = #"catch\s*(?:\(\s*(\w+)?\s*\))?\s*\{((?:[^{}]|\{[^{}]*\})*)\}"#
+
+        if let regex = try? NSRegularExpression(pattern: catchErrorPattern, options: [.dotMatchesLineSeparators]) {
+            let matches = regex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
+
+            for match in matches {
+                let errorVarName: String = {
+                    if match.numberOfRanges > 1, let nameRange = Range(match.range(at: 1), in: content) {
+                        return String(content[nameRange])
+                    } else {
+                        return "error"
+                    }
+                }()
+
+                guard match.numberOfRanges > 2,
+                      let bodyRange = Range(match.range(at: 2), in: content) else {
+                    continue
+                }
+
+                let catchBody = String(content[bodyRange])
+                ignoredParams.insert(errorVarName)
+
+                // Знаходимо error.something
+                let subPattern = #"(?<!\w)\#(errorVarName)\.(\w+)"#
+                if let subRegex = try? NSRegularExpression(pattern: subPattern) {
+                    let subMatches = subRegex.matches(in: catchBody, range: NSRange(catchBody.startIndex..<catchBody.endIndex, in: catchBody))
+                    for subMatch in subMatches {
+                        if subMatch.numberOfRanges > 2,
+                           let nameRange = Range(subMatch.range(at: 2), in: catchBody) {
+                            ignoredParams.insert(String(catchBody[nameRange]))
+                        }
+                    }
+                }
+            }
+        }
+
+
+        
+        /*
+        // MARK: - Частина 1: Ланцюжки викликів типу A.B.C.method(...)
+        let chainPattern = #"(?<!\w)([A-Z]\w*(?:<[^>]+>)?)((?:\.\w+)+)\s*\((.*?)\)"#
+
+        if let regex = try? NSRegularExpression(pattern: chainPattern, options: [.dotMatchesLineSeparators]) {
             let matches = regex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
             
             for match in matches {
@@ -250,7 +364,7 @@ class Obfuscator {
                     let parts = chain.split(separator: ".").map { String($0) }
                     ignoredParams.formUnion(parts)
 
-                    // 🔽 Додатково додаємо параметри з дужок — match.group(3)
+                    // 🔽 Параметри
                     if let paramsRange = Range(match.range(at: 3), in: content) {
                         let paramsString = String(content[paramsRange])
                         let paramPattern = #"\b(\w+)\s*:"#
@@ -258,8 +372,7 @@ class Obfuscator {
                             let paramMatches = paramRegex.matches(in: paramsString, range: NSRange(paramsString.startIndex..<paramsString.endIndex, in: paramsString))
                             for paramMatch in paramMatches {
                                 if let nameRange = Range(paramMatch.range(at: 1), in: paramsString) {
-                                    let paramName = String(paramsString[nameRange])
-                                    ignoredParams.insert(paramName)
+                                    ignoredParams.insert(String(paramsString[nameRange]))
                                 }
                             }
                         }
@@ -267,14 +380,11 @@ class Obfuscator {
                 }
             }
         }
+            */
+        // MARK: - Частина 2: Простий виклик типу SomeType(param1: param2:)
+        let paramsPattern = #"(?<!\w)([A-Z]\w*(?:<[^>]+>)?)?\s*\((.*?)\)"#
 
-
-        // MARK: - Частина 2: Витягаємо параметри з дужок (...), напр. param1:, param2:
-        let paramsPattern = #"""
-        (?<!\w)([A-Z]\w*(?:<[^>]+>)?)?\s*\(([^)]*?)\)
-        """#
-
-        if let regex = try? NSRegularExpression(pattern: paramsPattern) {
+        if let regex = try? NSRegularExpression(pattern: paramsPattern, options: [.dotMatchesLineSeparators]) {
             let matches = regex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
             
             for match in matches {
@@ -286,20 +396,20 @@ class Obfuscator {
                 let paramsString = String(content[paramsRange])
 
                 if !userDefinedTypes.contains(typeName) {
-                    // Параметри у вигляді "label:" — беремо лише label
                     let paramPattern = #"\b(\w+)\s*:"#
                     if let paramRegex = try? NSRegularExpression(pattern: paramPattern) {
                         let paramMatches = paramRegex.matches(in: paramsString, range: NSRange(paramsString.startIndex..<paramsString.endIndex, in: paramsString))
                         for paramMatch in paramMatches {
                             if let nameRange = Range(paramMatch.range(at: 1), in: paramsString) {
-                                let paramName = String(paramsString[nameRange])
-                                ignoredParams.insert(paramName)
+                                ignoredParams.insert(String(paramsString[nameRange]))
                             }
                         }
                     }
                 }
             }
         }
+        
+        
         
 
         // 1. Отримуємо всі відомі локальні типи

@@ -49,11 +49,17 @@ class CamelCaseDetector {
 
         let typeRegex = try! NSRegularExpression(pattern: "(class|struct)\\s+(\\w+)", options: [])
         let variableRegex = try! NSRegularExpression(
-            pattern: #"(?<!case\s)\b(let|var)\s+(\w+)"#,
+            pattern: #"(?<!case\s)(?:@\w+\s+)*(?:(?:private|public|internal|fileprivate|static)\s+)*\b(let|var)\s+(\w+)"#,
             options: []
         )
+        /*
         let methodRegex = try! NSRegularExpression(
             pattern: #"(?:\b\w+\s+)*func\s+(\w+)"#, 
+            options: []
+        )
+        */
+        let methodRegex = try! NSRegularExpression(
+            pattern: #"(?:(?:@\w+\s+)|(?:\b(?:public|private|internal|fileprivate|open|static|class|mutating|nonmutating|override)\s+))*func\s+(\w+)"#,
             options: []
         )
 

@@ -24,8 +24,8 @@ class MainViewModel: ObservableObject {
 
     func runObfuscation() {
 //        let rootPath = "/Users/macintoshhd/Documents/Xcode/Work/Test/TestObfuscare1"
-        let rootPath = "/Users/macintoshhd/Documents/Xcode/Work/Test/XSpy_OpenMainCodeForTest(new)"
-//        let rootPath = "/Users/macintoshhd/Documents/Xcode/Work/Test/TestObfuscare3"
+//        let rootPath = "/Users/macintoshhd/Documents/Xcode/Work/Test/XSpy_OpenMainCodeForTest(new)"
+        let rootPath = "/Users/macintoshhd/Documents/Xcode/Work/Test/TestObfuscare3"
         
         let rootURL = URL(fileURLWithPath: rootPath)
         let swiftFiles = projectScanner.scan(forSwiftFilesIn: rootURL)
