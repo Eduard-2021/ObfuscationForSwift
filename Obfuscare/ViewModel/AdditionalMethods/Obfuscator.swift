@@ -8,18 +8,11 @@
 import Foundation
 
 class Obfuscator {
-    var obfuscationMap: [String: [String: String]] = [:] // typeName -> [original: obfuscated]
+    var variableObfuscationMap: [String: [String: String]] = [:] // typeName -> [original: obfuscated]
     var methodObfuscationMap: [String: [String: String]] = [:]
     
     private let englishWords = variableNames
-    /*[
-        "Exp23_07_01","Exp23_07_02","Exp23_07_03","Exp23_07_04","Exp23_07_05","Exp23_07_06","Exp23_07_07","Exp23_07_08","Exp23_07_09","Exp23_07_010",
-        "Exp23_07_011","Exp23_07_012","Exp23_07_013","Exp23_07_014","Exp23_07_015","Exp23_07_016","Exp23_07_017","Exp23_07_018","Exp23_07_019","Exp23_07_020","Exp23_07_021","Exp23_07_022","Exp23_07_023","Exp23_07_024","Exp23_07_025","Exp23_07_026","Exp23_07_027","Exp23_07_028","Exp23_07_029","Exp23_07_030","Exp23_07_031","Exp23_07_032","Exp23_07_033","Exp23_07_034","Exp23_07_035","Exp23_07_036","Exp23_07_037","Exp23_07_038","Exp23_07_039","Exp23_07_040","Exp23_07_041","Exp23_07_042","Exp23_07_043",
-            ,"Exp23_07_036","Exp23_07_037","Exp23_07_038","Exp23_07_039","Exp23_07_040","Exp23_07_041","Exp23_07_042","Exp23_07_043",
-    ]
-    */
-    
-    
+
 //    let englishWords = ["Apple", "Orange", "Cloud", "Rocket", "Dream", "Falcon", "Tiger", "Echo"]
 
     func generateObfuscationMap(from variables: [VariableInfo]) {
@@ -50,7 +43,7 @@ class Obfuscator {
             }
 
             if !variableMap.isEmpty {
-                obfuscationMap[type] = variableMap
+                variableObfuscationMap[type] = variableMap
             }
             if !methodMap.isEmpty {
                 methodObfuscationMap[type] = methodMap
@@ -58,35 +51,6 @@ class Obfuscator {
         }
     }
 
-    
-    
-    
-    /*
-    func generateObfuscationMap(from variables: [VariableInfo]) {
-        let grouped = Dictionary(grouping: variables, by: { $0.typeName })
-
-        for (type, vars) in grouped {
-            var usedSuffixes = Set<String>()
-            var nameMap: [String: String] = [:]
-
-            for variable in vars {
-                let firstWord = extractFirstWord(from: variable.variableName)
-                var suffix: String
-                
-                let shortPrefix = abbreviatedFirstWord(from: firstWord)
-
-                repeat {
-                    suffix = englishWords.randomElement() ?? UUID().uuidString
-                } while usedSuffixes.contains(suffix)
-
-                usedSuffixes.insert(suffix)
-                nameMap[variable.variableName] = shortPrefix + suffix
-            }
-
-            obfuscationMap[type] = nameMap
-        }
-    }
-    */
 
     private func extractFirstWord(from camelCase: String) -> String {
         let pattern = "^[a-z]+"
@@ -107,130 +71,16 @@ class Obfuscator {
             }
     }
 
-    /*
-    func obfuscateVariables(in fileURL: URL, instanceToType: [String: String]) {
-        guard var content = try? String(contentsOf: fileURL) else { return }
-
-        for (typeName, mapping) in obfuscationMap {
-            for (original, obfuscated) in mapping {
-                let patterns = [
-                    "\\bself\\.\(original)\\b",
-                    "\\b\(original)\\b",
-                ] + instanceToType.compactMap { instance, type in
-                    type == typeName ? "\\bself?\\.\(instance)\\.\(original)\\b" : nil
-                }
-
-                for pattern in patterns {
-                    let regex = try! NSRegularExpression(pattern: pattern)
-                    let range = NSRange(content.startIndex..<content.endIndex, in: content)
-                    content = regex.stringByReplacingMatches(in: content, options: [], range: range, withTemplate: obfuscated)
-                }
-            }
-        }
-
-        try? content.write(to: fileURL, atomically: true, encoding: .utf8)
-    }
-     */
-    
-    
-    func obfuscateCodeOLD4(in fileURL: URL, instanceToType: [String: String], userDefinedTypes: Set<String>) {
-        guard var content = try? String(contentsOf: fileURL) else { return }
-
-        for (typeName, mapping) in obfuscationMap {
-            // Пропускаємо типи, яких немає серед оголошених у коді
-            guard userDefinedTypes.contains(typeName) else {
-                continue
-            }
-
-            for (original, obfuscated) in mapping {
-                let basePatterns: [(pattern: String, template: String)] = [
-                    ("\\bself\\.\(original)\\b", "self.\(obfuscated)"),
-                    ("(?<!\\w)\(original)\\b(?!\\s*\\()", obfuscated)
-                ]
-
-                let nestedPatterns: [(pattern: String, template: String)] = instanceToType
-                    .filter { $0.value == typeName }
-                    .flatMap { instance, _ in
-                        return [
-                            ("\\bself\\.\(instance)\\.\(original)\\b", "self.\(instance).\(obfuscated)"),
-                            ("(?<!\\w)\(instance)\\.\(original)\\b(?!\\s*\\()", "\(instance).\(obfuscated)")
-                        ]
-                    }
-
-                let handlerPatterns: [(pattern: String, template: String)] =
-                    original == "completionHandler"
-                        ? [("\\bcompletionHandler\\b(?=\\s*\\()", obfuscated)]
-                        : []
-
-                let allPatterns = basePatterns + nestedPatterns + handlerPatterns
-
-                for (pattern, template) in allPatterns {
-                    if let regex = try? NSRegularExpression(pattern: pattern) {
-                        let range = NSRange(content.startIndex..<content.endIndex, in: content)
-                        content = regex.stringByReplacingMatches(in: content, options: [], range: range, withTemplate: template)
-                    }
-                }
-            }
-        }
-
-        try? content.write(to: fileURL, atomically: true, encoding: .utf8)
-    }
-
-    
-    
     
     func obfuscateCode(in fileURL: URL, instanceToType: [String: String], userDefinedTypes: Set<String>) {
         guard var content = try? String(contentsOf: fileURL) else { return }
-
-            /*
-        // 1. Визначаємо імена змінних-параметрів, які не можна змінювати
-        var ignoredParams = Set<String>()
-        // Pattern для складних ланцюжків з крапками
-        let complexPattern = #"""
-        (?<!\w)(([A-Z]\w*)(?:<[^>]+>)?(?:\.\w+)+)\s*\([^)]*?\b(\w+)\s*:
-        """#
-
-        // Додатковий pattern для простих викликів типу SomeType(paramName:)
-        let simplePattern = #"""
-        (?<!\w)([A-Z]\w*)(?:<[^>]+>)?\s*\([^)]*?\b(\w+)\s*:
-        """#
-
-        // Аналізуємо обидва патерни
-        for (pattern, isComplex) in [(complexPattern, true), (simplePattern, false)] {
-            if let regex = try? NSRegularExpression(pattern: pattern) {
-                let matches = regex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
-                for match in matches {
-                    guard
-                        let typeRange = Range(match.range(at: 1), in: content),
-                        let paramRange = Range(match.range(at: isComplex ? 3 : 2), in: content)
-                    else { continue }
-
-                    let typePart = String(content[typeRange])
-                    let paramName = String(content[paramRange])
-
-                    // Отримуємо тип (без крапок та generic)
-                    let typeName = typePart.components(separatedBy: ".").first?.components(separatedBy: "<").first ?? typePart
-
-                    if !userDefinedTypes.contains(typeName) {
-                        // У складному — додаємо всі з ланцюжка + параметр
-                        if isComplex {
-                            let identifiers = typePart.components(separatedBy: ".").filter { !$0.contains("<") && !$0.isEmpty }
-                            identifiers.forEach { ignoredParams.insert($0) }
-                        }
-                        ignoredParams.insert(paramName)
-                    }
-                }
-            }
-        }
-             */
         
+        var ignoredParams: Set<String> = ["path", "response", "parse", "serialize", "response", "data", "error", "decode", "from", "main", "queue", "responseSerializer", "errorParser", "multipartFormData", "upload", "to", "result", "success", "failure", "sessionManager", "request", "get", "set", "headers", "salt", "range",  "run", "size", "environment", "connect", "key", "value", "context", "remove",  "height",  "info", "completionHandler", "center",
+        ]
         
-        
-        
-        var ignoredParams = Set<String>()
-        // MARK: - Частина 1: Ланцюжки викликів типу A.B.C.method(...) або з нового рядка .method(...)
+        // MARK: - Частина 1.1.: Ланцюжки викликів типу A.B.C.method(...) або з нового рядка .method(...)
         let chainPattern = #"(?<!\w)([A-Z]\w*(?:<[^>]+>)?)?(?:\s*\n)?((?:\.\w+)+)\s*\((.*?)\)"#
-
+        
         if let regex = try? NSRegularExpression(pattern: chainPattern, options: [.dotMatchesLineSeparators]) {
             let matches = regex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
             
@@ -239,19 +89,27 @@ class Obfuscator {
                     let typeRange = Range(match.range(at: 1), in: content),
                     let chainRange = Range(match.range(at: 2), in: content)
                 else { continue }
-
+                
                 let typeName = String(content[typeRange])
                 let chain = String(content[chainRange]) // .a.b.c
-
+                
                 // 🔧 Виправлення: працюємо і з пустим typeName (SwiftUI стиль)
                 if typeName.isEmpty || !userDefinedTypes.contains(typeName) {
+                    /*
                     let parts = chain
                         .split(separator: ".")
                         .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
                         .filter { !$0.isEmpty }
-
+                    
                     ignoredParams.formUnion(parts)
+                     */
+                    let chainParts = chain
+                        .components(separatedBy: ".")
+                        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                        .filter { !$0.isEmpty }
 
+                    ignoredParams.formUnion(chainParts)
+                    
                     // 🔽 Параметри всередині дужок (...), незалежно від рядків
                     if let paramsRange = Range(match.range(at: 3), in: content) {
                         let paramsString = String(content[paramsRange])
@@ -271,9 +129,65 @@ class Obfuscator {
                 }
             }
         }
+    
+        
+        // MARK: - Частина 1.2.: Збираємо зовнішні екземпляри (client = Something.something)
+        var externalInstances = Set<String>()
+        let assignmentPattern = #"(\w+)\s*=\s*[A-Z]\w*(?:<[^>]+>)?(?:\.\w+)+\s*\(.*?\)"#
+        if let assignRegex = try? NSRegularExpression(pattern: assignmentPattern, options: [.dotMatchesLineSeparators]) {
+            let assignMatches = assignRegex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
+            for assignMatch in assignMatches {
+                if assignMatch.numberOfRanges > 1,
+                   let nameRange = Range(assignMatch.range(at: 1), in: content) {
+                    let instanceName = String(content[nameRange])
+                    externalInstances.insert(instanceName)
+                }
+            }
+        }
 
-        
-        
+        // MARK: - Частина 1.3:  Для кожного такого екземпляру — шукаємо всі доступи типу client.x.y(...)
+        for instance in externalInstances {
+            // \b щоб не чіпати подібні до "myclient"
+            let accessPattern = #"(?<!\w)\b\#(instance)((?:\.\w+)+)(?:\s*\((.*?)\))?"#
+            if let accessRegex = try? NSRegularExpression(pattern: accessPattern, options: [.dotMatchesLineSeparators]) {
+                let accessMatches = accessRegex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
+
+                for accessMatch in accessMatches {
+                    // Доступи типу .files.upload
+                    guard accessMatch.numberOfRanges > 2,
+                          let chainRange = Range(accessMatch.range(at: 2), in: content)
+                    else { continue }
+
+                    let chain = String(content[chainRange])
+                    let parts = chain
+                        .components(separatedBy: ".")
+                        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                        .filter { !$0.isEmpty }
+
+                    ignoredParams.formUnion(parts)
+
+                    // Також додаємо параметри, якщо є
+                    if accessMatch.numberOfRanges > 3,
+                       let paramRange = Range(accessMatch.range(at: 3), in: content) {
+                        let paramString = String(content[paramRange])
+                        let paramPattern = #"\b(\w+)\s*:"#
+                        if let paramRegex = try? NSRegularExpression(pattern: paramPattern) {
+                            let paramMatches = paramRegex.matches(
+                                in: paramString,
+                                range: NSRange(paramString.startIndex..<paramString.endIndex, in: paramString)
+                            )
+                            for paramMatch in paramMatches {
+                                if let nameRange = Range(paramMatch.range(at: 1), in: paramString) {
+                                    ignoredParams.insert(String(paramString[nameRange]))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+      
         // MARK: - Частина 1-б: SwiftUI-style методи з нового рядка: .methodName(param1:, param2:)
         let swiftUIMethodPattern = #"(?m)^\s*\.(\w+)\s*\(([^)]*)\)"#
 
@@ -341,46 +255,36 @@ class Obfuscator {
                 }
             }
         }
-
-
         
-        /*
-        // MARK: - Частина 1: Ланцюжки викликів типу A.B.C.method(...)
-        let chainPattern = #"(?<!\w)([A-Z]\w*(?:<[^>]+>)?)((?:\.\w+)+)\s*\((.*?)\)"#
+        // MARK: - Частина 1-д: work with "get" and "set"
+        let accessorPattern = #"""
+        (?:var|let)\s+\w+\s*:\s*[^{}=\n]+\{\s*((?:\w+|\w+\s*\(\s*\w*\s*\))(\s*;\s*(\w+|\w+\s*\(\s*\w*\s*\)))?)\s*\}
+        """#
 
-        if let regex = try? NSRegularExpression(pattern: chainPattern, options: [.dotMatchesLineSeparators]) {
-            let matches = regex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
-            
+        if let accessorRegex = try? NSRegularExpression(pattern: accessorPattern, options: [.dotMatchesLineSeparators]) {
+            let matches = accessorRegex.matches(in: content, range: NSRange(content.startIndex..<content.endIndex, in: content))
+
             for match in matches {
-                guard
-                    let typeRange = Range(match.range(at: 1), in: content),
-                    let chainRange = Range(match.range(at: 2), in: content)
-                else { continue }
+                if match.numberOfRanges > 1,
+                   let fullAccessorsRange = Range(match.range(at: 1), in: content) {
+                    let accessorLine = content[fullAccessorsRange]
+                    // Розбиваємо за `;` або пробілом
+                    let tokens = accessorLine
+                        .replacingOccurrences(of: "(", with: "")
+                        .replacingOccurrences(of: ")", with: "")
+                        .split(whereSeparator: { $0 == " " || $0 == ";" })
 
-                let typeName = String(content[typeRange])
-                let chain = String(content[chainRange]) // .a.b.c
-
-                if !userDefinedTypes.contains(typeName) {
-                    let parts = chain.split(separator: ".").map { String($0) }
-                    ignoredParams.formUnion(parts)
-
-                    // 🔽 Параметри
-                    if let paramsRange = Range(match.range(at: 3), in: content) {
-                        let paramsString = String(content[paramsRange])
-                        let paramPattern = #"\b(\w+)\s*:"#
-                        if let paramRegex = try? NSRegularExpression(pattern: paramPattern) {
-                            let paramMatches = paramRegex.matches(in: paramsString, range: NSRange(paramsString.startIndex..<paramsString.endIndex, in: paramsString))
-                            for paramMatch in paramMatches {
-                                if let nameRange = Range(paramMatch.range(at: 1), in: paramsString) {
-                                    ignoredParams.insert(String(paramsString[nameRange]))
-                                }
-                            }
+                    for token in tokens {
+                        let trimmed = token.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if !trimmed.isEmpty {
+                            ignoredParams.insert(trimmed)
                         }
                     }
                 }
             }
         }
-            */
+
+
         // MARK: - Частина 2: Простий виклик типу SomeType(param1: param2:)
         let paramsPattern = #"(?<!\w)([A-Z]\w*(?:<[^>]+>)?)?\s*\((.*?)\)"#
 
@@ -413,15 +317,17 @@ class Obfuscator {
         
 
         // 1. Отримуємо всі відомі локальні типи
-        let knownTypes = Set(obfuscationMap.keys).union(methodObfuscationMap.keys)
+        let knownTypes = Set(variableObfuscationMap.keys).union(methodObfuscationMap.keys)
 
         // 2. Фільтруємо instanceToType: залишаємо лише ті, що мають локальні типи
         let localInstanceToType = instanceToType.filter { knownTypes.contains($0.value) }
 
         // 3. Обфускація змінних
-        for (typeName, mapping) in obfuscationMap {
+        for (typeName, mapping) in variableObfuscationMap {
             
-            guard userDefinedTypes.contains(typeName) else { continue }
+            guard userDefinedTypes.contains(typeName) else {
+                continue
+            }
             
             for (original, obfuscated) in mapping {
                 
@@ -431,15 +337,24 @@ class Obfuscator {
                     ("\\bself\\.\(original)\\b", "self.\(obfuscated)"),
                     ("(?<!\\w)\(original)\\b(?!\\s*\\()", obfuscated)
                 ]
-
+     
+                
                 let nestedPatterns: [(pattern: String, template: String)] = localInstanceToType
                     .filter { $0.value == typeName }
                     .flatMap { instance, _ in
+                        if let otherType = localInstanceToType[original], otherType != typeName {
+                            return [(pattern: String, template: String)]()
+                        }
+
+                        let negativeLookahead = #"(?!(\s*\()|(\s*\{)|(\s+async\b)|(\s+await\b))"#
+
                         return [
                             ("\\bself\\.\(instance)\\.\(original)\\b", "self.\(instance).\(obfuscated)"),
-                            ("(?<!\\w)\(instance)\\.\(original)\\b(?!\\s*\\()", "\(instance).\(obfuscated)")
+                            ("(?<!\\w)\(instance)\\.\(original)\\b\(negativeLookahead)", "\(instance).\(obfuscated)")
                         ]
                     }
+                
+                
                 
                 // Патерн для completionHandler()
                 var handlerPatterns: [(pattern: String, template: String)] = []
@@ -507,7 +422,7 @@ class Obfuscator {
         guard var content = try? String(contentsOf: fileURL) else { return }
 
         // Обфускація змінних
-        for (typeName, mapping) in obfuscationMap {
+        for (typeName, mapping) in variableObfuscationMap {
             for (original, obfuscated) in mapping {
                 let basePatterns: [(pattern: String, template: String)] = [
                     ("\\bself\\.\(original)\\b", "self.\(obfuscated)"),
@@ -574,7 +489,7 @@ class Obfuscator {
         guard var content = try? String(contentsOf: fileURL) else { return }
         var count = 0
         
-        for (typeName, mapping) in obfuscationMap {
+        for (typeName, mapping) in                 variableObfuscationMap {
             count += 1
             for (original, obfuscated) in mapping {
                 // Базові патерни: self.property і просто property
