@@ -12,28 +12,74 @@ class Obfuscator {
     var methodObfuscationMap: [String: [String: String]] = [:]
     
     private let englishWords = variableNames
+    private var englishWordsSet = Set<String>()
+
 
 //    let englishWords = ["Apple", "Orange", "Cloud", "Rocket", "Dream", "Falcon", "Tiger", "Echo"]
 
+    
+    
+    func extractWords(from variables: [String]) {
+        let pattern = "([A-Z]?[a-z]+)"
+        let regex = try! NSRegularExpression(pattern: pattern)
+
+        for name in variables {
+            let matches = regex.matches(in: name, range: NSRange(name.startIndex..., in: name))
+            var words: [String] = matches.map {
+                String(name[Range($0.range, in: name)!])
+            }
+            
+            // Перше слово з великої літери
+            if let first = words.first {
+                words[0] = first.capitalized
+            }
+            
+            // Додаємо всі слова у множину
+            for word in words {
+                englishWordsSet.insert(word)
+            }
+        }
+    }
+    
+    
+    
     func generateObfuscationMap(from variables: [VariableInfo]) {
+        
+        let onlyVariables = variables.map { $0.variableName }
+        let onlyTypeName = variables.map { $0.typeName }
+        let variablesAndTypeName = onlyVariables + onlyTypeName
+        extractWords(from: variablesAndTypeName)
+        
+        
         let grouped = Dictionary(grouping: variables, by: { $0.typeName })
 
         for (type, items) in grouped {
+            var usedPrefixes = Set<String>()
             var usedSuffixes = Set<String>()
             var variableMap: [String: String] = [:]
             var methodMap: [String: String] = [:]
 
             for item in items {
-                let firstWord = extractFirstWord(from: item.variableName)
-                let shortPrefix = abbreviatedFirstWord(from: firstWord)
+//                let firstWord = extractFirstWord(from: item.variableName)
+//                let shortPrefix = abbreviatedFirstWord(from: firstWord)
 
+                var prefix: String
+                repeat {
+                    prefix = englishWordsSet.randomElement() ?? UUID().uuidString
+//                    suffix = englishWords.randomElement() ?? UUID().uuidString
+                } while usedPrefixes.contains(prefix)
+                usedPrefixes.insert(prefix)
+                
                 var suffix: String
                 repeat {
-                    suffix = englishWords.randomElement() ?? UUID().uuidString
+                    suffix = englishWordsSet.randomElement() ?? UUID().uuidString
+//                    suffix = englishWords.randomElement() ?? UUID().uuidString
                 } while usedSuffixes.contains(suffix)
                 usedSuffixes.insert(suffix)
 
-                let obfuscatedName = shortPrefix + suffix
+                let obfuscatedName = prefix.lowercased() + suffix
+//                let obfuscatedName = shortPrefix + suffix
+
 
                 if item.isMethod {
                     methodMap[item.variableName] = obfuscatedName

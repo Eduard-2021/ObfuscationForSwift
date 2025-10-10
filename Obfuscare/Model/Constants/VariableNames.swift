@@ -6,6 +6,10 @@
 //
  import SwiftUI
 
+
+var englishWordsSet = Set<String>()
+
+
 let variableNames = [
 "Exp23_07_041",
 "Exp23_07_042",

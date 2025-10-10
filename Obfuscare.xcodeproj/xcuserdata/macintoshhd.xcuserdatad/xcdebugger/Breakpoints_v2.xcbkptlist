@@ -175,8 +175,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "523"
-            endingLineNumber = "523"
+            startingLineNumber = "569"
+            endingLineNumber = "569"
             landmarkName = "obfuscateCodeOLD_worked(in:instanceToType:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -192,8 +192,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "496"
-            endingLineNumber = "496"
+            startingLineNumber = "542"
+            endingLineNumber = "542"
             landmarkName = "obfuscateCodeOLD_worked(in:instanceToType:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -208,8 +208,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "493"
-            endingLineNumber = "493"
+            startingLineNumber = "539"
+            endingLineNumber = "539"
             landmarkName = "obfuscateCodeOLD_worked(in:instanceToType:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -240,8 +240,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "492"
-            endingLineNumber = "492"
+            startingLineNumber = "538"
+            endingLineNumber = "538"
             landmarkName = "obfuscateCodeOLD_worked(in:instanceToType:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -256,8 +256,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "381"
-            endingLineNumber = "381"
+            startingLineNumber = "427"
+            endingLineNumber = "427"
             landmarkName = "obfuscateCode(in:instanceToType:userDefinedTypes:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -320,8 +320,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "385"
-            endingLineNumber = "385"
+            startingLineNumber = "431"
+            endingLineNumber = "431"
             landmarkName = "obfuscateCode(in:instanceToType:userDefinedTypes:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -336,8 +336,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "326"
-            endingLineNumber = "326"
+            startingLineNumber = "372"
+            endingLineNumber = "372"
             landmarkName = "obfuscateCode(in:instanceToType:userDefinedTypes:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -368,8 +368,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "320"
-            endingLineNumber = "320"
+            startingLineNumber = "366"
+            endingLineNumber = "366"
             landmarkName = "obfuscateCode(in:instanceToType:userDefinedTypes:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -384,8 +384,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "323"
-            endingLineNumber = "323"
+            startingLineNumber = "369"
+            endingLineNumber = "369"
             landmarkName = "obfuscateCode(in:instanceToType:userDefinedTypes:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -400,8 +400,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "94"
-            endingLineNumber = "94"
+            startingLineNumber = "140"
+            endingLineNumber = "140"
             landmarkName = "obfuscateCode(in:instanceToType:userDefinedTypes:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -416,8 +416,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "104"
-            endingLineNumber = "104"
+            startingLineNumber = "150"
+            endingLineNumber = "150"
             landmarkName = "obfuscateCode(in:instanceToType:userDefinedTypes:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -432,8 +432,8 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "192"
-            endingLineNumber = "192"
+            startingLineNumber = "238"
+            endingLineNumber = "238"
             landmarkName = "obfuscateCode(in:instanceToType:userDefinedTypes:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -448,9 +448,25 @@
             filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "329"
-            endingLineNumber = "329"
+            startingLineNumber = "375"
+            endingLineNumber = "375"
             landmarkName = "obfuscateCode(in:instanceToType:userDefinedTypes:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "4A55BF45-961F-48F4-BE0A-F07299072B33"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Obfuscare/ViewModel/AdditionalMethods/Obfuscator.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "84"
+            endingLineNumber = "84"
+            landmarkName = "generateObfuscationMap(from:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
